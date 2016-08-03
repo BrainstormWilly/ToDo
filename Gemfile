@@ -14,7 +14,6 @@ source 'https://rubygems.org'
 gem 'rails', '4.2.6'
 
 group :development, :test do
-  gem 'web-console', '~> 2.0'
   gem 'byebug'
   gem 'spring'
   gem 'rspec-rails'
@@ -24,6 +23,7 @@ group :development, :test do
 end
 
 group :development do
+  gem 'web-console', '~> 2.0'
   gem 'sqlite3'
 end
 
@@ -44,3 +44,5 @@ gem 'pry'
 gem 'jbuilder', '~> 2.0'
 # bundle exec rake doc:rails generates the API under doc/api.
 gem 'sdoc', '~> 0.4.0', group: :doc
+gem 'active_model_serializers'
+gem 'bcrypt'
