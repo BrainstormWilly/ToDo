@@ -3,6 +3,7 @@ require 'rails_helper'
 RSpec.describe Api::ListsController, type: :controller do
 
   let( :user ) { create(:user) }
+  let( :list ) { create(:list, user: user)}
 
   context "guest" do
 
@@ -20,6 +21,18 @@ RSpec.describe Api::ListsController, type: :controller do
       end
       it "does not create new list" do
         expect{post :create, user_id: 1, list: {title: "Test List", user_id:1}}.to change(List, :count).by(0)
+      end
+    end
+
+    describe "DELETE #destroy" do
+      it "returns http unauthorized" do
+        delete :destroy, user_id: user.id, id: list.id
+        expect(response).to have_http_status(401)
+      end
+      it "does not delete user" do
+        delete :destroy, user_id: user.id, id: list.id
+        count = List.where(id: list.id).count
+        expect(count).to eq 1
       end
     end
 
@@ -52,6 +65,22 @@ RSpec.describe Api::ListsController, type: :controller do
       end
       it "post with different user does not create new list" do
         expect{post :create, user_id: user.id+1, list: {title: "Test List", user_id:user.id}}.to change(List, :count).by(0)
+      end
+    end
+
+    describe "DELETE #destroy" do
+      it "returns http no content on success" do
+        delete :destroy, user_id: user.id, id: list.id
+        expect(response).to have_http_status(:no_content)
+      end
+      it "returns http not found on unknown list" do
+        delete :destroy, user_id: user.id, id: 0
+        expect(response).to have_http_status(:not_found)
+      end
+      it "does not delete user" do
+        delete :destroy, user_id: user.id, id: list.id
+        count = List.where(id: list.id).count
+        expect(count).to eq 0
       end
     end
 

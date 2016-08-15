@@ -31,6 +31,18 @@ RSpec.describe Api::UsersController, type: :controller do
       end
     end
 
+    describe "DELETE #destroy" do
+      it "returns http unauthorized" do
+        delete :destroy, id: user.id
+        expect(response).to have_http_status(401)
+      end
+      it "does not delete user" do
+        delete :destroy, id: user.id
+        count = User.where(id: user.id).count
+        expect(count).to eq 1
+      end
+    end
+
   end
 
   context "member" do
@@ -55,6 +67,21 @@ RSpec.describe Api::UsersController, type: :controller do
         expect{post :create, user: new_user_attributes}.to change(User, :count).by(1)
       end
     end
+
+    describe "DELETE #destroy" do
+      it "returns http no content" do
+        delete :destroy, id: user.id
+        expect(response).to have_http_status(:no_content)
+      end
+      it "returns http not found" do
+        delete :destroy, id: 0
+        expect(response).to have_http_status(:not_found)
+      end
+      it "deletes user" do
+        expect{delete :destroy, id: user.id}.to change(User, :count).by(-1)
+      end
+    end
+
 
   end
 
