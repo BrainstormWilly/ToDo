@@ -1,10 +1,13 @@
 class Api::ListsController < ApiController
 
   before_action :authenticated?
-  before_action :authorize_user, only: [:create]
 
   def index
-    lists = List.all
+    if @current_user.admin?
+      lists = List.all
+    else
+      lists = List.where(user:@current_user)
+    end
     render json: lists, each_serializer: ListSerializer
   end
 
@@ -20,8 +23,12 @@ class Api::ListsController < ApiController
   def destroy
      begin
        list = List.find(params[:id])
-       list.destroy
-       render json: {}, status: :no_content
+       if list.user==@current_user || @current_user.admin?
+         list.destroy
+         render json: {}, status: :no_content
+       else
+         render json: {error: "Authorization Failure", status: 400}, status: 400
+       end
      rescue ActiveRecord::RecordNotFound
        render :json => {}, :status => :not_found
      end
@@ -32,13 +39,5 @@ class Api::ListsController < ApiController
   def list_params
     params.require(:list).permit(:title, :description)
   end
-
-
-  def authorize_user
-    unless @current_user.id.to_s == params['user_id']
-      render json: {error: "Authorization Failure", status: 400}, status: 400
-    end
-  end
-
 
 end

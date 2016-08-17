@@ -1,6 +1,8 @@
 class Api::UsersController < ApiController
 
   before_action :authenticated?
+  before_action :authorize_admin, only: [:create]
+  before_action :authorize_user, only: [:destroy]
 
   def index
     users = User.all
@@ -30,7 +32,19 @@ class Api::UsersController < ApiController
   private
 
   def user_params
-    params.require(:user).permit(:email, :password, :name)
+    params.require(:user).permit(:email, :password, :name, :password_confirmation)
+  end
+
+  def authorize_admin
+    unless @current_user.admin?
+      render json: {error: "Authorization Failure", status: 400}, status: 400
+    end
+  end
+
+  def authorize_user
+    unless @current_user.admin? || @current_user.id.to_s==params["id"]
+      render json: {error: "Authorization Failure", status: 400}, status: 400
+    end
   end
 
 

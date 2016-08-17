@@ -10,7 +10,7 @@
 end
 users = User.all
 
-me = User.create(name: "Willy", email: "brainstormwilly@gmail.com", password: "123456", password_confirmation: '123456')
+me = User.create(name: "Willy", email: "brainstormwilly@gmail.com", role: "admin", password: "123456", password_confirmation: '123456')
 
 rand(5..10).times do
   list = List.create(title: Faker::Lorem.sentence, description: Faker::Lorem.paragraph, user: users.sample)
