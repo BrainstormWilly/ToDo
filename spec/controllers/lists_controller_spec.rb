@@ -7,6 +7,7 @@ RSpec.describe Api::ListsController, type: :controller do
   let( :admin )       { create(:user, role:"admin") }
   let( :list )        { create(:list, user: user) }
   let( :other_list )  { create(:list, user: other_user) }
+  let( :other_private_list )  { create(:list, user: other_user, permissions: "to_private") }
   let( :admin_list )  { create(:list, user: admin) }
 
   context "guest" do
@@ -14,7 +15,7 @@ RSpec.describe Api::ListsController, type: :controller do
     describe "GET #index" do
       it "returns http unauthorized" do
         get :index, user_id: 1
-        expect(response).to have_http_status(401)
+        expect(response).to have_http_status(:unauthorized)
       end
     end
 
@@ -28,10 +29,17 @@ RSpec.describe Api::ListsController, type: :controller do
       end
     end
 
+    describe "PUT #update" do
+      it "returns http unauthorized" do
+        put :update, id: list.id, list: {title:Faker::Lorem.sentence}
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
     describe "DELETE #destroy" do
       it "returns http unauthorized" do
         delete :destroy, id: list.id
-        expect(response).to have_http_status(401)
+        expect(response).to have_http_status(:unauthorized)
       end
       it "does not delete user" do
         delete :destroy, id: list.id
@@ -64,6 +72,45 @@ RSpec.describe Api::ListsController, type: :controller do
         expect{post :create, list: {title: "Test List"}}.to change(List, :count).by(1)
       end
     end
+
+    describe "PUT #update" do
+      it "on own list returns http success" do
+        put :update, id: list.id, list: {title:Faker::Lorem.sentence}
+        expect(response).to have_http_status(:success)
+      end
+      it "on own list updates list" do
+        new_title = Faker::Lorem.sentence
+        put :update, id: list.id, list: {title:new_title}
+        changed_list = JSON.parse(response.body)
+        expect(changed_list["title"]).to eq new_title
+      end
+      it "on own list updates list permissions" do
+        put :update, id: list.id, list: {permissions:"to_private"}
+        changed_list = JSON.parse(response.body)
+        expect(changed_list["permissions"]).to eq "to_private"
+      end
+      it "on unowned public list returns http success" do
+        put :update, id: other_list.id, list: {title:Faker::Lorem.sentence}
+        expect(response).to have_http_status(:success)
+      end
+      it "on unowned public list updates list" do
+        new_title = Faker::Lorem.sentence
+        put :update, id: other_list.id, list: {title:new_title}
+        changed_list = JSON.parse(response.body)
+        expect(changed_list["title"]).to eq new_title
+      end
+      it "on unowned private list returns http unauthorized" do
+        put :update, id: other_private_list.id, list: {title:Faker::Lorem.sentence}
+        expect(response).to have_http_status(:unauthorized)
+      end
+      it "on unowned private list does not update list" do
+        old_title = other_private_list.title
+        put :update, id: other_private_list.id, list: {title:Faker::Lorem.sentence}
+        changed_list = List.find(list.id)
+        expect(changed_list.title).to eq old_title
+      end
+    end
+
 
     describe "DELETE #destroy" do
       it "returns http no content on success" do
@@ -103,6 +150,39 @@ RSpec.describe Api::ListsController, type: :controller do
       end
       it "with own list creates new list" do
         expect{post :create, list: {title: "Test List"}}.to change(List, :count).by(1)
+      end
+    end
+
+    describe "PUT #update" do
+      it "on own list returns http success" do
+        put :update, id: admin_list.id, list: {title:Faker::Lorem.sentence}
+        expect(response).to have_http_status(:success)
+      end
+      it "on own list updates list" do
+        new_title = Faker::Lorem.sentence
+        put :update, id: admin_list.id, list: {title:new_title}
+        changed_list = JSON.parse(response.body)
+        expect(changed_list["title"]).to eq new_title
+      end
+      it "on unowned public list returns http success" do
+        put :update, id: other_list.id, list: {title:Faker::Lorem.sentence}
+        expect(response).to have_http_status(:success)
+      end
+      it "on unowned public list updates list" do
+        new_title = Faker::Lorem.sentence
+        put :update, id: other_list.id, list: {title:new_title}
+        changed_list = JSON.parse(response.body)
+        expect(changed_list["title"]).to eq new_title
+      end
+      it "on unowned private list returns http success" do
+        put :update, id: other_private_list.id, list: {title:Faker::Lorem.sentence}
+        expect(response).to have_http_status(:success)
+      end
+      it "on unowned private list updates list" do
+        new_title = Faker::Lorem.sentence
+        put :update, id: other_private_list.id, list: {title:new_title}
+        changed_list = JSON.parse(response.body)
+        expect(changed_list["title"]).to eq new_title
       end
     end
 

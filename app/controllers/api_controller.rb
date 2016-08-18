@@ -2,6 +2,8 @@ class ApiController < ApplicationController
 
   skip_before_action :verify_authenticity_token
 
+  rescue_from Pundit::NotAuthorizedError, with: :user_unauthorized
+
   private
 
   def authenticated?
@@ -11,6 +13,14 @@ class ApiController < ApplicationController
       # username=="brainstormwilly@gmail.com" && password=="123456"
       # User.where(email: username, password: password).present?
     }
+  end
+
+  def pundit_user
+    @current_user
+  end
+
+  def user_unauthorized
+    render :json => {}, :status => :unauthorized
   end
 
 

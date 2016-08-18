@@ -63,7 +63,7 @@ RSpec.describe Api::UsersController, type: :controller do
     describe "POST #create" do
       it "returns http unauthorized" do
         post :create, user: new_user_attributes
-        expect(response).to have_http_status(400)
+        expect(response).to have_http_status(:unauthorized)
       end
       it "does not create new user" do
         expect{post :create, user: new_user_attributes}.to change(User, :count).by(0)
@@ -85,7 +85,7 @@ RSpec.describe Api::UsersController, type: :controller do
     describe "DELETE #destroy other" do
       it "returns http unauthorized" do
         delete :destroy, id: admin.id
-        expect(response).to have_http_status(400)
+        expect(response).to have_http_status(:unauthorized)
       end
       it "does not delete user" do
         delete :destroy, id: admin.id

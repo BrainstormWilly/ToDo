@@ -7,12 +7,12 @@ Rails.application.routes.draw do
   namespace :api, defaults: { format: :json } do
 
     resources :users
-    resources :lists, only: [:index, :destroy, :create]
+    resources :lists, only: [:index, :destroy, :create, :update]
     resources :lists, only: [] do
-      resources :items, only: [:create]
+      resources :items, only: [:index, :create]
     end
-  
-    resources :items, only: [:destroy]
+
+    resources :items, only: [:destroy, :update]
 
   end
 

@@ -14,6 +14,12 @@ RSpec.describe Item, type: :model do
     it "should have title, list attributes" do
       expect(item).to have_attributes(title: item.title, list: list)
     end
+    it "should respond to completed" do
+      expect(item).to respond_to(:completed?)
+    end
+    it "should be incomplete by default" do
+      expect(item.completed?).to be_falsey
+    end
   end
 
   describe "invalid item" do

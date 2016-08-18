@@ -10,6 +10,7 @@
 end
 users = User.all
 
+aa = User.create(name: "Mr. A", email:"a@a.com", password:"123456", password_confirmation:"123456")
 me = User.create(name: "Willy", email: "brainstormwilly@gmail.com", role: "admin", password: "123456", password_confirmation: '123456')
 
 rand(5..10).times do
@@ -17,6 +18,11 @@ rand(5..10).times do
 end
 lists = List.all
 
+al = List.create(title:"Mr. A's Todo List", description: Faker::Lorem.paragraph, user: aa)
+
 rand(50..80).times do
   item = Item.create( title: Faker::Lorem.sentence, body: Faker::Lorem.paragraph, list: lists.sample )
 end
+
+ai1 = Item.create( title: "Todo #1", body: Faker::Lorem.paragraph, list: al)
+ai2 = Item.create( title: "Todo #2", body: Faker::Lorem.paragraph, list: al)

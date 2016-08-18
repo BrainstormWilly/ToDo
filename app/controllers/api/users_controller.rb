@@ -1,16 +1,17 @@
 class Api::UsersController < ApiController
 
   before_action :authenticated?
-  before_action :authorize_admin, only: [:create]
-  before_action :authorize_user, only: [:destroy]
+  # before_action :authorize_admin, only: [:create]
+  # before_action :authorize_user, only: [:destroy]
 
   def index
-    users = User.all
+    users = policy_scope(User)
     render json: users, each_serializer: UserSerializer
   end
 
   def create
     user = User.new(user_params)
+    authorize user
     if user.save
       render json: user
     else
@@ -21,6 +22,7 @@ class Api::UsersController < ApiController
   def destroy
      begin
        user = User.find(params[:id])
+       authorize user
        user.destroy
        render json: {}, status: :no_content
      rescue ActiveRecord::RecordNotFound
@@ -35,17 +37,17 @@ class Api::UsersController < ApiController
     params.require(:user).permit(:email, :password, :name, :password_confirmation)
   end
 
-  def authorize_admin
-    unless @current_user.admin?
-      render json: {error: "Authorization Failure", status: 400}, status: 400
-    end
-  end
-
-  def authorize_user
-    unless @current_user.admin? || @current_user.id.to_s==params["id"]
-      render json: {error: "Authorization Failure", status: 400}, status: 400
-    end
-  end
+  # def authorize_admin
+  #   unless @current_user.admin?
+  #     render json: {error: "Authorization Failure", status: 400}, status: 400
+  #   end
+  # end
+  #
+  # def authorize_user
+  #   unless @current_user.admin? || @current_user.id.to_s==params["id"]
+  #     render json: {error: "Authorization Failure", status: 400}, status: 400
+  #   end
+  # end
 
 
 end
